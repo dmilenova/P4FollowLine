@@ -250,6 +250,47 @@ Payload JSON:
 	"action": "VISIBLE_LINE",
         "value": 0.00
 }
+Explicación de ejecución y métodos utilizados:
+
+Para la implementación de esta práctica hemos dividido nuestro código en dos partes, uno que comunica el Arduino con el ESP-32, y otro que se comunica de forma inversa. Además de comunicarse entre ellos, el código que se carga en el Arduino lee los valores del sensor de distancia y del infrarrojo para detectar tanto línea como obstáculos, y el del ESP-32 se utiliza para enviar los mensajes MQTT al Arduino.
+
+A continuación se detalla una breve explicación de cada uno de ellos:
+
+Comunicación Arduino-ESP32: 
+
+Primero, configuramos los pines del infrarrojos y del sensor de distancia, al igual que los pines asignados a los motores (puestos en HIGH para que vayan hacia adelante). 
+
+Después creamos un bucle while en el que leemos el puerto serie y esperamos a que nos llegue desde el ESP-32 un "mensaje de confirmación" que nosotros hemos llamado "CONNECTED", para que comience a ejecutar el resto del programa (este mensaje "CONNECTED" solo llegará una vez el ESP-32 se haya conectado tanto a la Wi-Fi como al servidor MQTT). 
+
+Para manejar los datos de los sensores hemos creado dos tareas:
+
+- CheckLine: Lee los datos del sensor infrarrojos para que no pierda la línea.
+
+
+Figura 2. Sensor infrarrojos
+
+- CheckDistance: Mide la distancia a la que estamos del obstáculo, que lo detecta a larga distancia (entre 50 y 8 cm), y que se detiene una vez haya entrado en el rango asignado (entre 5 y 8 cm).
+
+Figura 3. Sensor de ultrasonidos HC-SR04
+
+Y por último, para manejar la funcionalidad de los tiempos que va tomando el PING, hemos creado un hilo que se ejecuta cada 4 segundos, y que envía a través del puerto serie un mensaje al ESP-32 con dicho tiempo.
+
+Comunicación ESP32-Arduino:
+
+En primer lugar, el ESP-32 se conecta a la Wi-Fi y al servidor MQTT, y una vez conectado a ambos, comienza a enviar los mensajes al Arduino.
+
+Una vez haya enviado el mensaje "CONNECTED" al ARDUINO por el puerto serie, éste empezará a enviar sus mensajes. Ahora sí, el ESP-32 empezará a recibir y a procesar los mensajes que le van llegando.
+
+Tenemos varias condiciones, una por cada tipo de mensaje que queremos enviar al servidor. Estos mensajes se dividen en dos grupos:
+
+- Mensajes que no procesan ningún dato numérico: Simplemente procesa el texto enviado por el Arduino UNO. Si este coincide con el string asignado a cada una de las condiciones, se va a crear un mensaje en formato JSON, y se publicará al servidor (START_LAP, LINE_LOST, OBSTACLE_DETECTED).
+
+
+Figura 4. Publicación de mensajes
+
+- Mensajes que procesan datos numéricos: Por una parte tenemos el mensaje de PING, que después de recibirse, espera y se queda leyendo hasta que le llegue un caracter especial (en este caso *), con lo que obtenemos el tiempo y lo añadimos al mensaje, para después publicarse. Y por otro lado tenemos el mensaje de final de vuelta, cuyo comportamiento es igual que el del mensaje de PING, añadiendo que una vez se publique un mensaje de este tipo, se desconecte del servidor.
+  
+[!["Video de demostración"](blob:https://urjc-my.sharepoint.com/3e04c5a0-4a68-4d0e-80b9-68e135a72eec]([https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/Efd3H29si2RPpcqHbTmciNsBM4kapEtorS-1T-ncA0YY8w](https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/EZ7R67EjpsNIgJ6sOvRk3rABhWEhnUhP-ohHuZIk0_vjDQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=Xkko9O))
 
 
 
