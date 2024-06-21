@@ -290,7 +290,7 @@ Figura 4. Publicación de mensajes
 
 - Mensajes que procesan datos numéricos: Por una parte tenemos el mensaje de PING, que después de recibirse, espera y se queda leyendo hasta que le llegue un caracter especial (en este caso *), con lo que obtenemos el tiempo y lo añadimos al mensaje, para después publicarse. Y por otro lado tenemos el mensaje de final de vuelta, cuyo comportamiento es igual que el del mensaje de PING, añadiendo que una vez se publique un mensaje de este tipo, se desconecte del servidor.
   
-[!["Video de demostración"](blob:https://urjc-my.sharepoint.com/3e04c5a0-4a68-4d0e-80b9-68e135a72eec]([https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/Efd3H29si2RPpcqHbTmciNsBM4kapEtorS-1T-ncA0YY8w](https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/EZ7R67EjpsNIgJ6sOvRk3rABhWEhnUhP-ohHuZIk0_vjDQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=Xkko9O))
+[!["Video de demostración"]([https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/Efd3H29si2RPpcqHbTmciNsBM4kapEtorS-1T-ncA0YY8w](https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/EZ7R67EjpsNIgJ6sOvRk3rABhWEhnUhP-ohHuZIk0_vjDQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=Xkko9O))
 
 
 
