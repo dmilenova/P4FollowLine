@@ -1,17 +1,52 @@
-# P4FollowLine
-Explicación de ejecución y métodos utilizados:
+P4FollowLIne:
 
-Para la implementación de esta práctica hemos dividido nuestro código en dos partes, uno que comunica el Arduino con el ESP-32, y otro que se comunica de forma inversa. Además de comunicarse entre ellos, el código que se carga en el Arduino lee los valores del sensor de distancia y del infrarrojo para detectar tanto línea como obstáculos, y el del ESP-32 se utiliza para enviar los mensajes MQTT al Arduino.
+Como funciona:
 
-A continuación se detalla una breve explicación de cada uno de ellos:
+Para la practica tenemos que comunicar entre si la ESP32 y el arduino. Para ello lo que hemos hecho es un Serial en ESP32 para que se comunique con el arduino.
 
-Comunicación Arduino-ESP32: 
+  // Serial port to communicate with Arduino UNO
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
 
-Primero, configuramos los pines del infrarrojos y del sensor de distancia, al igual que los pines asignados a los motores (puestos en HIGH para que vayan hacia adelante). 
+Este serial será el que estara leyendo los mensajes que el arduino va mandando, tales como, que empieza vuelta, pierde la linea...
 
-Después creamos un bucle while en el que leemos el puerto serie y esperamos a que nos llegue desde el ESP-32 un "mensaje de confirmación" que nosotros hemos llamado "--------", para que comience a ejecutar el resto del programa (este mensaje "-------" solo llegará una vez el ESP-32 se haya conectado tanto a la Wi-Fi como al servidor MQTT). 
+Para leer los mensajes que esta mandando el arduino creamos un buffer vacio, basicamente un string vacio. Comprobamos si el Serial2 esta disponible y leemos el char del serial y 
+lo guardamos en el buffer. Como los mensajes que manda nuestro arduino son ya mensaje completo, comprobamos todo el rato si el caracter leido es "}", en caso de que sea ese significa
+que hemos llegado al final del mensaje y debemos enviarlo. Para ello entramos en un if que al principio elimina espacios en blanco tanto al principio como al final del buffer. Luego 
+hacemos otra comprobacion para ver si la longitud del buffer es mayor que 2, pues este debe empezar por "{" y acabar en "}". Si no es mayor que 2 el mensaje es descartado. En caso de que
+sea un mensaje correcto el que se ha recibido, lo publicamos por el MQTT.
+
+El MQTT Esta configurado de la siguiente manera:
+
+Adafruit_MQTT_Client mqtt(&espClient, SERVER, SERVERPORT);
+Adafruit_MQTT_Publish test = Adafruit_MQTT_Publish(&mqtt, "/SETR/2023/16/");
+
+Donde server espClient es un WifiClient, Server:193.147.53.2 y SERVERPORT:21883.
+
+Respecto a Arduino.
+
+Como funciona es muy sencillo:
+
+En el bucle loop para empezar tenemos una cuenta atras para que de tiempo al ESP32 a conectarse a la red WiFI, una vez que este delay termina, empezamos a cronometrar el tiempo de la vueltay
+y mandamos el mensaje de que empieza vuelta. Luego empezamos a leer de los sensores para comprobar si esta o no en la linea, además de comprobar si hay un obstaculo cerca. En caso de que 
+el sensor derecho o izq, dejen de detectar la linea veran cual es la ultima lectura que hicieron, si fue izquierda, iran a la derecha y viceversa. Además mandaran mensajes de linea perdida
+o linea encontrada en cada caso. 
+
+Para el ping es un counter de tiempo que cada 4 segundos manda el mensaje.
+
+Para finalizar la vuelta es necesario detectar el obstaculo. Para ello vamos leyendo en cada iteracion el sensor de distancia y comprobando a cuanto esta. Cuando este cerca este se parara
+y enviara un mensaje diciendo la distancia a la que esta el obstaculo. Ademñas enviara un mensaje de que ha acabado la vuelta y el tiempo que ha tardado.
 
 
-[!["Video de demostración"](blob:https://urjc-my.sharepoint.com/529f144a-2bd8-4e6f-9d58-ea01bc0a8a79)](https://urjc-my.sharepoint.com/:v:/g/personal/d_milenova_2019_alumnos_urjc_es/EZ7R67EjpsNIgJ6sOvRk3rABhWEhnUhP-ohHuZIk0_vjDQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=AldwIv)
+
+Observaciones.
+
+En la entrega extraordinaria nos fallo que los mensajes se mandaban en una cadena con muchos mensajes y no uno por uno. Esto se debia a que estabamos leyendo el string completo del serial 
+y este a veces era un conjunto de muchos mensajes. Para solucionarlo hemos implementado el buffer que va guardando los caracteres y al encontrar el final del mensaje, lo envia.
+Además tambien nos fallo que cuando lo solucionamos en el examen enviaba caracteres nulos, esto fue porque no esperabamos a que hubiera datos en el serial ni esperabamos a que estuviera
+disponible, por lo cual enviaba "basura". Con los ultimos retoques hemnos conseguido que envie los mensajes correctamente.
+
+https://github.com/dmilenova/P4FollowLine/assets/73531592/3b097510-2268-460d-be57-1f8f8d8906a2
+
+
 
 
